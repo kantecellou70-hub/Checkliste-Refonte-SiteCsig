@@ -45,6 +45,17 @@ body {
   gap: 20px;
 }
 
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo {
+  height: 48px;
+  width: auto;
+}
+
 .header-brand h1 {
   font-size: 1.25rem;
   font-weight: 700;
