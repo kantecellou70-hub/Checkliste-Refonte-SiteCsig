@@ -456,11 +456,155 @@ document.getElementById('confirm-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('confirm-overlay')) hideConfirm();
 });
 
+// ── CHAT ──────────────────────────────────────────────────────────────────────
+const CHAT_NAME_KEY = 'csig-chat-name';
+let chatName = localStorage.getItem(CHAT_NAME_KEY) || '';
+let chatOpen = false;
+let chatUnread = 0;
+let chatMessages = [];
+
+const chatFab          = document.getElementById('chat-fab');
+const chatPanel        = document.getElementById('chat-panel');
+const chatBadgeEl      = document.getElementById('chat-badge');
+const chatNameScreen   = document.getElementById('chat-name-screen');
+const chatMsgScreen    = document.getElementById('chat-messages-screen');
+const chatNameInput    = document.getElementById('chat-name-input');
+const chatNameConfirm  = document.getElementById('chat-name-confirm');
+const chatMessagesEl   = document.getElementById('chat-messages');
+const chatTextInput    = document.getElementById('chat-text-input');
+const chatSendBtn      = document.getElementById('chat-send');
+
+function openChat() {
+  chatOpen = true;
+  chatPanel.classList.remove('hidden');
+  chatUnread = 0;
+  updateChatBadge();
+  if (chatName) {
+    showChatMessages();
+  } else {
+    chatNameScreen.classList.remove('hidden');
+    chatMsgScreen.classList.add('hidden');
+    setTimeout(() => chatNameInput.focus(), 50);
+  }
+}
+
+function closeChat() {
+  chatOpen = false;
+  chatPanel.classList.add('hidden');
+}
+
+function showChatMessages() {
+  chatNameScreen.classList.add('hidden');
+  chatMsgScreen.classList.remove('hidden');
+  renderChatMessages();
+  setTimeout(() => chatTextInput.focus(), 50);
+}
+
+function updateChatBadge() {
+  if (chatUnread > 0 && !chatOpen) {
+    chatBadgeEl.textContent = chatUnread > 9 ? '9+' : chatUnread;
+    chatBadgeEl.classList.remove('hidden');
+  } else {
+    chatBadgeEl.classList.add('hidden');
+  }
+}
+
+function formatChatTime(ts) {
+  return new Date(ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderChatMessages() {
+  if (!chatMessages.length) {
+    chatMessagesEl.innerHTML = '<p class="chat-empty">Aucun message pour l\'instant.<br>Soyez le premier à écrire !</p>';
+    return;
+  }
+  chatMessagesEl.innerHTML = chatMessages.map(m => {
+    const isMe = m.author === chatName;
+    return `
+      <div class="chat-msg${isMe ? ' chat-msg-me' : ''}">
+        ${!isMe ? `<span class="chat-msg-author">${esc(m.author)}</span>` : ''}
+        <div class="chat-bubble">${esc(m.text)}</div>
+        <span class="chat-msg-time">${formatChatTime(m.created_at)}</span>
+      </div>`;
+  }).join('');
+  requestAnimationFrame(() => { chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; });
+}
+
+async function loadChatMessages() {
+  const { data: rows } = await db
+    .from('chat_messages')
+    .select('*')
+    .order('created_at', { ascending: true })
+    .limit(100);
+  if (rows) {
+    chatMessages = rows;
+    if (chatOpen && chatName) renderChatMessages();
+  }
+}
+
+async function sendChatMessage() {
+  const text = chatTextInput.value.trim();
+  if (!text || !chatName) return;
+  chatTextInput.value = '';
+  await db.from('chat_messages').insert({ author: chatName, text });
+}
+
+function setupChatRealtime() {
+  db.channel('chat-new-messages')
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+      payload => {
+        chatMessages.push(payload.new);
+        if (chatOpen && chatName) {
+          renderChatMessages();
+        } else {
+          chatUnread++;
+          updateChatBadge();
+        }
+      }
+    )
+    .subscribe();
+}
+
+// ── CHAT EVENTS ───────────────────────────────────────────────────────────────
+chatFab.addEventListener('click', () => chatOpen ? closeChat() : openChat());
+
+document.getElementById('chat-close').addEventListener('click', closeChat);
+
+document.getElementById('chat-change-name').addEventListener('click', () => {
+  chatName = '';
+  localStorage.removeItem(CHAT_NAME_KEY);
+  chatMsgScreen.classList.add('hidden');
+  chatNameScreen.classList.remove('hidden');
+  chatNameInput.value = '';
+  setTimeout(() => chatNameInput.focus(), 50);
+});
+
+chatNameConfirm.addEventListener('click', () => {
+  const name = chatNameInput.value.trim();
+  if (!name) return;
+  chatName = name;
+  localStorage.setItem(CHAT_NAME_KEY, chatName);
+  showChatMessages();
+});
+
+chatNameInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') chatNameConfirm.click();
+});
+
+chatSendBtn.addEventListener('click', sendChatMessage);
+
+chatTextInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendChatMessage();
+});
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
   data = await loadData();
   render();
   setupRealtime();
+  loadChatMessages();
+  setupChatRealtime();
   document.getElementById('loading-overlay').style.display = 'none';
 }
 

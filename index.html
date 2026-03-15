@@ -68,6 +68,39 @@
     </div>
   </div>
 
+  <!-- Chat FAB -->
+  <button class="chat-fab" id="chat-fab" title="Ouvrir le chat">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span class="chat-badge hidden" id="chat-badge">0</span>
+  </button>
+
+  <!-- Chat panel -->
+  <div class="chat-panel hidden" id="chat-panel">
+    <div class="chat-panel-header">
+      <span>Chat équipe</span>
+      <div class="chat-panel-header-actions">
+        <button class="chat-btn-icon" id="chat-change-name" title="Changer de prénom">&#9998; Prénom</button>
+        <button class="chat-btn-icon" id="chat-close" title="Fermer">&#10005;</button>
+      </div>
+    </div>
+
+    <!-- Écran saisie du prénom -->
+    <div class="chat-name-screen" id="chat-name-screen">
+      <p>Entrez votre prénom pour rejoindre le chat</p>
+      <input class="chat-name-input" type="text" id="chat-name-input" placeholder="Votre prénom…" maxlength="30" autocomplete="off">
+      <button class="chat-name-confirm" id="chat-name-confirm">Rejoindre →</button>
+    </div>
+
+    <!-- Écran messages -->
+    <div class="chat-messages-screen hidden" id="chat-messages-screen">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-row">
+        <input class="chat-text-input" type="text" id="chat-text-input" placeholder="Message…" autocomplete="off" maxlength="500">
+        <button class="chat-send-btn" id="chat-send">&#10148;</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
