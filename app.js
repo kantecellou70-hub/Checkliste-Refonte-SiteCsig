@@ -1,6 +1,9 @@
 'use strict';
 
-const STORAGE_KEY = 'csig-checklist-v2';
+// ── SUPABASE ───────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://kniceutirsdegxojazth.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_tOzYdUG4raxaJKJT8yN7MQ_jB1fXUz7';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── DATA PAR DEFAUT ───────────────────────────────────────────────────────────
 const defaultData = [
@@ -133,18 +136,46 @@ const defaultData = [
 
 // ── PERSISTANCE ───────────────────────────────────────────────────────────────
 let data;
+let saveTimer = null;
 
-function loadData() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(defaultData));
-  } catch {
-    return JSON.parse(JSON.stringify(defaultData));
+async function loadData() {
+  const { data: row, error } = await db
+    .from('checklist')
+    .select('data')
+    .eq('id', 1)
+    .single();
+
+  if (error || !row) {
+    const initial = JSON.parse(JSON.stringify(defaultData));
+    await db.from('checklist').upsert({ id: 1, data: initial });
+    return initial;
   }
+  return row.data;
 }
 
 function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    await db.from('checklist').upsert({
+      id: 1,
+      data: data,
+      updated_at: new Date().toISOString()
+    });
+  }, 400);
+}
+
+function setupRealtime() {
+  db.channel('checklist-sync')
+    .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'checklist', filter: 'id=eq.1' },
+      payload => {
+        const modalOpen = !document.getElementById('modal-overlay').classList.contains('hidden');
+        if (modalOpen) return;
+        data = payload.new.data;
+        render();
+      }
+    )
+    .subscribe();
 }
 
 // ── UTILITAIRES ───────────────────────────────────────────────────────────────
@@ -426,5 +457,11 @@ document.getElementById('confirm-overlay').addEventListener('click', e => {
 });
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-data = loadData();
-render();
+async function init() {
+  data = await loadData();
+  render();
+  setupRealtime();
+  document.getElementById('loading-overlay').style.display = 'none';
+}
+
+init();
