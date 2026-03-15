@@ -1,11 +1,11 @@
 :root {
-  --primary: #F5C518;
-  --primary-dark: #c9a000;
-  --primary-light: #fffbea;
+  --primary: #FF6200;
+  --primary-dark: #cc4e00;
+  --primary-light: #fff2ea;
   --bg: #f0f2f5;
   --surface: #ffffff;
   --border: #e4e7ec;
-  --text: #111827;
+  --text: #0f0f0f;
   --text-secondary: #6b7280;
   --danger: #ef4444;
   --danger-light: #fee2e2;
@@ -29,7 +29,7 @@ body {
 
 /* ── HEADER ─────────────────────────────────────────────── */
 .app-header {
-  background: #111827;
+  background: #0f0f0f;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -522,7 +522,7 @@ body {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #111827;
+  background: #0f0f0f;
   border: none;
   cursor: pointer;
   display: flex;
@@ -587,7 +587,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 13px 16px;
-  background: #111827;
+  background: #0f0f0f;
   flex-shrink: 0;
 }
 
@@ -732,7 +732,7 @@ body {
 }
 
 .chat-msg-me .chat-bubble {
-  background: #111827;
+  background: #0f0f0f;
   color: #f3f4f6;
   border-radius: 14px 14px 4px 14px;
 }
@@ -770,7 +770,7 @@ body {
 .chat-text-input:focus { border-color: var(--primary-dark); }
 
 .chat-send-btn {
-  background: #111827;
+  background: #0f0f0f;
   border: none;
   border-radius: 8px;
   padding: 9px 14px;
