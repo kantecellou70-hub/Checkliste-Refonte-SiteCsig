@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklist — Refonte Site CSIG</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <h1>Refonte Site CSIG</h1>
+        <span class="header-subtitle">Suivi des tâches</span>
+      </div>
+      <div class="header-stats">
+        <span id="global-stats">0 / 0 tâches</span>
+      </div>
+      <div class="header-progress">
+        <div class="progress-track">
+          <div class="progress-fill" id="global-progress-fill"></div>
+        </div>
+        <span class="progress-value" id="global-progress-value">0%</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="sections-container" id="sections-container"></div>
+    <div class="add-section-wrapper">
+      <button class="btn-add-section" id="btn-add-section">
+        <span>+</span> Ajouter une section
+      </button>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Modifier</h3>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <textarea class="modal-input" id="modal-input" rows="3" placeholder="Saisir le texte..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-cancel">Annuler</button>
+        <button class="btn btn-primary" id="modal-confirm">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm dialog -->
+  <div class="modal-overlay hidden" id="confirm-overlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="confirm-title">Confirmer</h3>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="confirm-cancel">Annuler</button>
+        <button class="btn btn-danger" id="confirm-ok">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
